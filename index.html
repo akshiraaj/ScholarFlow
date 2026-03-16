@@ -1,105 +1,270 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ScholarFlow</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet" />
-  <style>
-    body { font-family: 'Sora', sans-serif; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --bg: #030208;
+            --nebula-purple: #4714ad;
+            --nebula-pink: #1b027e;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #ffffff;
+            --subtext: #a0a0c0;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- THE VIBRANT COSMOS --- */
+        .universe {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: 
+                radial-gradient(circle at 15% 15%, rgba(28, 23, 172, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(28, 23, 172, 0.155) 0%, transparent 40%),
+                black;
+            z-index: -2;
+        }
+
+        .stars {
+            position: absolute;
+            width: 200%; height: 200%;
+            background-image: radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
+                              radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
+                              radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0,0,0,0));
+            background-repeat: repeat;
+            background-size: 500px 500px;
+            opacity: 1;
+            animation: drift 100s linear infinite;
+        }
+
+        @keyframes drift {
+            from { transform: translate(0, 0); }
+            to { transform: translate(-10%, -30%); }
+        }
+
+        /* --- NAV BAR --- */
+        nav {
+            position: absolute;
+            top: 0; width: 100%;
+            padding: 40px 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .nav-links { display: flex; gap: 40px; }
+        .nav-links a {
+            color: var(--subtext);
+            text-decoration: none;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover { color: var(--nebula-purple); text-shadow: 0 0 10px var(--nebula-purple); }
+
+        /* --- THE DASHBOARD --- */
+        .scholar-container {
+            width: 85vw;
+            height: 75vh;
+            background: var(--glass);
+            backdrop-filter: blur(40px);
+            border: 1px solid var(--border);
+            border-radius: 40px;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            padding: 80px;
+            box-shadow: 0 0 80px rgba(107, 33, 255, 0.1);
+            position: relative;
+        }
+
+        h1 {
+            font-size: 5rem;
+            margin: 0;
+            line-height: 0.9;
+            background: linear-gradient(to top, #fff, #dcd5ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .tagline { color: var(--subtext); font-size: 1 rem; margin-top: 20px; max-width: 400px; }
+
+        /* --- THE AUTO-CLICKING ENGINE --- */
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .task-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            padding: 25px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Autopilot Click Animation Logic */
+        .checkbox {
+            width: 28px; height: 28px;
+            border: 2px solid #444;
+            border-radius: 8px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+        }
+
+        .checkbox::after {
+            content: '✓';
+            opacity: 10;
+            color: white;
+            font-weight: 900;
+            transform: scale(0.5);
+            transition: 0.3s;
+        }
+
+        /* Sequential Completion Animation */
+        .task-card:nth-child(1) { animation: autoClick 10s infinite 0s; }
+        .task-card:nth-child(2) { animation: autoClick 10s infinite 2.5s; }
+        .task-card:nth-child(3) { animation: autoClick 10s infinite 5s; }
+
+        @keyframes autoClick {
+            0%, 100% { transform: scale(1); background: rgba(255,255,255,0.02); border-color: var(--border); }
+            10%, 40% { transform: scale(1.02); background: rgba(107, 33, 255, 0.1); border-color: var(--nebula-purple); box-shadow: 0 0 30px rgba(107, 33, 255, 0.2); }
+            10%, 40% { /* Nested checkmark state handled by keyframe matching */ }
+        }
+
+        /* Target the checkboxes within the animation cycle */
+        .task-card:nth-child(1) .checkbox { animation: checkFill 8s infinite 0s; }
+        .task-card:nth-child(2) .checkbox { animation: checkFill 8s infinite 2.5s; }
+        .task-card:nth-child(3) .checkbox { animation: checkFill 8s infinite 5s; }
+
+        @keyframes checkFill {
+            0%, 10% { background: transparent; border-color: #444; }
+            15%, 45% { background: var(--nebula-purple); border-color: var(--nebula-purple); box-shadow: 0 0 15px var(--nebula-purple); }
+            100% { background: transparent; border-color: #444; }
+        }
+
+        .task-card:nth-child(1) .checkbox::after { animation: checkMark 8s infinite 0s; }
+        .task-card:nth-child(2) .checkbox::after { animation: checkMark 8s infinite 2.5s; }
+        .task-card:nth-child(3) .checkbox::after { animation: checkMark 8s infinite 5s; }
+
+        @keyframes checkMark {
+            0%, 15% { opacity: 0; transform: scale(0.5); }
+            20%, 45% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; }
+        }
+
+        /* --- PRETTY GLOWS --- */
+        .glow-orb {
+            position: fixed;
+            width: 400px; height: 400px;
+            border-radius: 50%;
+            background: var(--nebula-pink);
+            filter: blur(80px);
+            opacity: 0.2;
+            z-index: -1;
+            animation: pulse 10s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { transform: translate(-10%, -10%) scale(1); }
+            to { transform: translate(10%, 10%) scale(1.3); }
+        }
+
+        .enter-btn {
+            margin-top: 20px;
+            padding: 18px 45px;
+            border-radius: 100px;
+            border: 1px solid var(--border);
+            background: rgba(24, 1, 73, 0.05);
+            color: rgba(255, 255, 255, 0.88);
+            font-weight: 600;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: 0.4s;
+            text-transform: capitalize;
+        }
+
+        .enter-btn:hover {
+            border-color: var(--nebula-pink);
+            box-shadow: 0 0 10px rgba(23, 5, 113, 0.3);
+            transform: translateY(-3px);
+        }
+
+    </style>
 </head>
-<body class="bg-slate-50 min-h-screen">
+<body>
 
-  <!-- HEADER -->
-  <header class="bg-white border-b border-slate-200 px-8 py-5">
-    <div class="max-w-4xl mx-auto flex items-center justify-between">
-      <div>
-        <h1 class="text-2xl font-bold text-indigo-600">ScholarFlow</h1>
-        <p class="text-sm text-slate-400">Your assignments, organized.</p>
-      </div>
-      <span class="text-sm bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full font-medium">
-        3 due soon
-      </span>
+    <div class="universe">
+        <div class="stars"></div>
     </div>
-  </header>
+    <div class="glow-orb"></div>
 
-  <!-- MAIN -->
-  <main class="max-w-4xl mx-auto px-8 py-10">
+    <nav>
+        <div class="logo" style="font-weight: 900; letter-spacing: 3px;">ScholarFlow</div>
+        <div class="nav-links">
+            <a href="#">Home</a>
+            <a href="#">The Dev</a>
+            <a href="#">Contact</a>
+        </div>
+    </nav>
 
-    <!-- STATS ROW -->
-    <div class="grid grid-cols-3 gap-4 mb-10">
-      <div class="bg-white rounded-xl p-5 border border-slate-200">
-        <p class="text-xs text-slate-400 mb-1">Total assignments</p>
-        <p class="text-3xl font-bold text-slate-800">6</p>
-      </div>
-      <div class="bg-white rounded-xl p-5 border border-slate-200">
-        <p class="text-xs text-slate-400 mb-1">Due this week</p>
-        <p class="text-3xl font-bold text-indigo-600">3</p>
-      </div>
-      <div class="bg-white rounded-xl p-5 border border-slate-200">
-        <p class="text-xs text-slate-400 mb-1">High priority</p>
-        <p class="text-3xl font-bold text-red-500">2</p>
-      </div>
-    </div>
+    <main class="scholar-container">
+        <div class="hero">
+            <h1>Scholar<br>Flow.</h1>
+            <p class="tagline">The automated companion that handles your school tasks while you stay in 'flow'.</p>
+            <button class="enter-btn"> Get Started</button>
+        </div>
 
-    <!-- ASSIGNMENT TABLE -->
-    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-      <div class="px-6 py-4 border-b border-slate-100">
-        <h2 class="font-semibold text-slate-700">All Assignments</h2>
-      </div>
-      <table class="w-full text-sm">
-        <thead class="bg-slate-50 text-slate-400 uppercase text-xs">
-          <tr>
-            <th class="text-left px-6 py-3">Subject</th>
-            <th class="text-left px-6 py-3">Assignment</th>
-            <th class="text-left px-6 py-3">Due Date</th>
-            <th class="text-left px-6 py-3">Priority</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100">
-          <tr class="bg-red-50">
-            <td class="px-6 py-4 font-medium text-slate-700">Math</td>
-            <td class="px-6 py-4 text-slate-600">Calculus Problem Set 3</td>
-            <td class="px-6 py-4 text-slate-500">Mar 17, 2026</td>
-            <td class="px-6 py-4"><span class="bg-red-100 text-red-600 px-2 py-1 rounded-full text-xs font-medium">High</span></td>
-          </tr>
-          <tr class="bg-red-50">
-            <td class="px-6 py-4 font-medium text-slate-700">English</td>
-            <td class="px-6 py-4 text-slate-600">Essay — The Great Gatsby</td>
-            <td class="px-6 py-4 text-slate-500">Mar 18, 2026</td>
-            <td class="px-6 py-4"><span class="bg-red-100 text-red-600 px-2 py-1 rounded-full text-xs font-medium">High</span></td>
-          </tr>
-          <tr class="bg-yellow-50">
-            <td class="px-6 py-4 font-medium text-slate-700">Physics</td>
-            <td class="px-6 py-4 text-slate-600">Lab Report — Projectile Motion</td>
-            <td class="px-6 py-4 text-slate-500">Mar 20, 2026</td>
-            <td class="px-6 py-4"><span class="bg-yellow-100 text-yellow-600 px-2 py-1 rounded-full text-xs font-medium">Medium</span></td>
-          </tr>
-          <tr class="bg-yellow-50">
-            <td class="px-6 py-4 font-medium text-slate-700">History</td>
-            <td class="px-6 py-4 text-slate-600">Research Notes — WW2</td>
-            <td class="px-6 py-4 text-slate-500">Mar 22, 2026</td>
-            <td class="px-6 py-4"><span class="bg-yellow-100 text-yellow-600 px-2 py-1 rounded-full text-xs font-medium">Medium</span></td>
-          </tr>
-          <tr class="bg-green-50">
-            <td class="px-6 py-4 font-medium text-slate-700">Computer Science</td>
-            <td class="px-6 py-4 text-slate-600">Binary Search Implementation</td>
-            <td class="px-6 py-4 text-slate-500">Mar 25, 2026</td>
-            <td class="px-6 py-4"><span class="bg-green-100 text-green-600 px-2 py-1 rounded-full text-xs font-medium">Low</span></td>
-          </tr>
-          <tr class="bg-green-50">
-            <td class="px-6 py-4 font-medium text-slate-700">Chemistry</td>
-            <td class="px-6 py-4 text-slate-600">Periodic Table Quiz Prep</td>
-            <td class="px-6 py-4 text-slate-500">Mar 27, 2026</td>
-            <td class="px-6 py-4"><span class="bg-green-100 text-green-600 px-2 py-1 rounded-full text-xs font-medium">Low</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+        <div class="task-list">
+            <div class="task-card">
+                <div class="checkbox"></div>
+                <div>
+                    <h4 style="margin:0">Organic Chem Prep</h4>
+                    <p style="margin:5px 0 0 0; font-size:0.8rem; color:var(--subtext)">AI is drafting notes...</p>
+                </div>
+            </div>
 
-  </main>
+            <div class="task-card">
+                <div class="checkbox"></div>
+                <div>
+                    <h4 style="margin:0">Literature Review</h4>
+                    <p style="margin:5px 0 0 0; font-size:0.8rem; color:var(--subtext)">Summarizing 4 papers...</p>
+                </div>
+            </div>
+
+            <div class="task-card">
+                <div class="checkbox"></div>
+                <div>
+                    <h4 style="margin:0">Calculus Set #9</h4>
+                    <p style="margin:5px 0 0 0; font-size:0.8rem; color:var(--subtext)">Optimizing solutions...</p>
+                </div>
+            </div>
+        </div>
+    </main>
 
 </body>
 </html>
