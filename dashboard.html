@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ScholarFlow — Dashboard</title>
+  <link rel="stylesheet" href="dashboard.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <div class="bg-grid"></div>
+
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-dot"></span>
+        <div>
+          <h1>ScholarFlow</h1>
+          <p class="tagline">dashboard</p>
+        </div>
+      </div>
+      <a href="index.html" class="back-btn">← Home</a>
+    </div>
+  </header>
+
+  <main>
+
+    <div class="page-title" style="--i:0">
+      <h2>Your Assignments</h2>
+      <p>Sorted by due date. Stay ahead.</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card" style="--i:1">
+        <p class="stat-label">Total</p>
+        <p class="stat-number">6</p>
+      </div>
+      <div class="stat-card" style="--i:2">
+        <p class="stat-label">Due this week</p>
+        <p class="stat-number accent">3</p>
+      </div>
+      <div class="stat-card" style="--i:3">
+        <p class="stat-label">High priority</p>
+        <p class="stat-number danger">2</p>
+      </div>
+      <div class="stat-card" style="--i:4">
+        <p class="stat-label">Completed</p>
+        <p class="stat-number success">1</p>
+      </div>
+    </div>
+
+    <div class="table-card" style="--i:5">
+      <div class="table-header">
+        <h2>All Assignments</h2>
+        <span class="mono">6 total</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Subject</th>
+            <th>Assignment</th>
+            <th>Due Date</th>
+            <th>Priority</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="subject">Math</td>
+            <td>Calculus Problem Set 3</td>
+            <td class="mono-cell">Mar 17, 2026</td>
+            <td><span class="badge badge-high">High</span></td>
+            <td><span class="status status-pending">Pending</span></td>
+          </tr>
+          <tr>
+            <td class="subject">English</td>
+            <td>Essay — The Great Gatsby</td>
+            <td class="mono-cell">Mar 18, 2026</td>
+            <td><span class="badge badge-high">High</span></td>
+            <td><span class="status status-pending">Pending</span></td>
+          </tr>
+          <tr>
+            <td class="subject">Physics</td>
+            <td>Lab Report — Projectile Motion</td>
+            <td class="mono-cell">Mar 20, 2026</td>
+            <td><span class="badge badge-medium">Medium</span></td>
+            <td><span class="status status-pending">Pending</span></td>
+          </tr>
+          <tr>
+            <td class="subject">History</td>
+            <td>Research Notes — WW2</td>
+            <td class="mono-cell">Mar 22, 2026</td>
+            <td><span class="badge badge-medium">Medium</span></td>
+            <td><span class="status status-pending">Pending</span></td>
+          </tr>
+          <tr>
+            <td class="subject">Computer Science</td>
+            <td>Binary Search Implementation</td>
+            <td class="mono-cell">Mar 25, 2026</td>
+            <td><span class="badge badge-low">Low</span></td>
+            <td><span class="status status-done">Done</span></td>
+          </tr>
+          <tr>
+            <td class="subject">Chemistry</td>
+            <td>Periodic Table Quiz Prep</td>
+            <td class="mono-cell">Mar 27, 2026</td>
+            <td><span class="badge badge-low">Low</span></td>
+            <td><span class="status status-pending">Pending</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+
+</body>
+</html>
