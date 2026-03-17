@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScholarFlow — Entry</title>
+    <style>
+        :root {
+            --bg: #030208;
+            --nebula-purple: #4714ad;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #ffffff;
+            --subtext: #a0a0c0;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .universe {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 15% 15%, rgba(28, 23, 172, 0.15) 0%, transparent 40%), black;
+            z-index: -2;
+        }
+
+        .auth-card {
+            width: 400px;
+            background: var(--glass);
+            backdrop-filter: blur(40px);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 0 80px rgba(107, 33, 255, 0.1);
+            text-align: center;
+            transition: 0.5s;
+        }
+
+        .auth-card:hover {
+            border-color: var(--nebula-purple);
+            box-shadow: 0 0 100px rgba(71, 20, 173, 0.2);
+        }
+
+        h2 { font-size: 2rem; margin-bottom: 10px; }
+        p { color: var(--subtext); margin-bottom: 30px; font-size: 0.9rem; }
+
+        .input-group { margin-bottom: 20px; text-align: left; }
+        label { display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--subtext); margin-bottom: 8px; }
+        
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: white;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus { border-color: var(--nebula-purple); background: rgba(255, 255, 255, 0.1); }
+
+        .auth-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--nebula-purple);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        /* Google Button Style */
+        .google-btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: 0.3s;
+        }
+
+        .google-btn:hover { background: rgba(255, 255, 255, 0.1); }
+
+        .toggle-link {
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: var(--subtext);
+            cursor: pointer;
+        }
+
+        .toggle-link span { color: white; text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <div class="universe"></div>
+
+    <div class="auth-card">
+        <h2 id="auth-title">Welcome Back</h2>
+        <p id="auth-subtitle">Sync with ScholarFlow.</p>
+
+        <button class="google-btn" id="google-login">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
+            Google
+        </button>
+
+        <div style="margin-bottom: 20px; color: var(--subtext); font-size: 0.8rem;">or use email</div>
+
+        <div class="input-group">
+            <label>Email Address</label>
+            <input type="email" id="email" placeholder="name@scholarflow.space">
+        </div>
+
+        <div class="input-group">
+            <label>Access Key</label>
+            <input type="password" id="password" placeholder="••••••••">
+        </div>
+
+        <button class="auth-btn" id="email-btn">Sign In</button>
+
+        <div class="toggle-link" id="auth-toggle">
+            Don't have an account? <span>Sign Up</span>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    
+        const firebaseConfig = {
+          apiKey: "AIzaSyCOEb8cFTGdpQrIgjUjqQCGI4q1z96XIkA",
+          authDomain: "scholarflow-28cf0.firebaseapp.com",
+          projectId: "scholarflow-28cf0",
+          storageBucket: "scholarflow-28cf0.firebasestorage.app",
+          messagingSenderId: "126752346207",
+          appId: "1:126752346207:web:92b8026906a4b97bfacbea"
+        };
+    
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+    
+        const emailBtn = document.getElementById('email-btn');
+        const googleBtn = document.getElementById('google-login');
+        const authToggle = document.getElementById('auth-toggle');
+        const authTitle = document.getElementById('auth-title');
+        
+        // 1. ADDED THE MISSING isLogin VARIABLE
+        let isLogin = true;
+
+        // 2. TOGGLE LOGIC (Switches between Login and Sign Up)
+        authToggle.onclick = () => {
+            isLogin = !isLogin;
+            authTitle.innerText = isLogin ? "Welcome Back" : "Create Account";
+            emailBtn.innerText = isLogin ? "Sign In" : "Begin Journey";
+            authToggle.innerHTML = isLogin ? "Don't have an account? <span>Sign Up</span>" : "Already synced? <span>Sign In</span>";
+        };
+    
+        if (googleBtn) {
+            googleBtn.onclick = async () => {
+                try {
+                    await signInWithPopup(auth, provider);
+                    window.location.href = "dashboard.html";
+                } catch (err) {
+                    alert("Google Error: " + err.message);
+                }
+            };
+        }
+    
+        if (emailBtn) {
+            emailBtn.onclick = async () => {
+                const email = document.getElementById('email').value;
+                const pass = document.getElementById('password').value;
+                
+                if (!email || !pass) {
+                    alert("Fill in the fields, twin!");
+                    return;
+                }
+    
+                try {
+                    if (isLogin) {
+                        await signInWithEmailAndPassword(auth, email, pass);
+                    } else {
+                        await createUserWithEmailAndPassword(auth, email, pass);
+                    }
+                    window.location.href = "dashboard.html";
+                } catch (err) {
+                    alert(err.message);
+                }
+            };
+        }
+    </script>
+</body>
+</html>

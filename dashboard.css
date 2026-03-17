@@ -1,212 +1,256 @@
-/* --- COSMIC VARIABLES --- */
 :root {
-    --bg: #010205;
-    --nebula-purple: #6b21ff;
-    --nebula-pink: #1a044f;
-    --glass: rgba(255, 255, 255, 0.02);
-    --glass-bright: rgba(255, 255, 255, 0.05);
-    --border: rgba(255, 255, 255, 0.08);
-    --text-main: #ffffff;
+    --bg-dark: #030208;
+    --glass: rgba(18, 20, 50, 0.5);
+    --glass-border: rgba(100, 150, 255, 0.12);
+    --accent: #4714ad;
+    --accent-glow: rgba(138, 148, 255, 0.4);
     --text-dim: #a0a0c0;
-    --accent-blue: #4a9eff;
-    --success: #00ff88;
-    --danger: #ff4b4b;
-    --font-main: 'Sora', sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
-}
-
-/* --- SPACE BASE --- */
-body {
+    --success: #00ff9d;
+    --danger: #ff4747;
+  }
+  
+  body {
     margin: 0;
-    background-color: var(--bg);
-    color: var(--text-main);
-    font-family: var(--font-main);
+    padding: 0;
+    font-family: 'Sora', sans-serif;
+    background: radial-gradient(circle at 50% 0%, #151632 0%, #030208 80%);
+    color: white;
     min-height: 100vh;
     overflow-x: hidden;
-    /* Spacey Gradient Background */
-    background: 
-        radial-gradient(circle at 10% 20%, rgba(107, 33, 255, 0.1) 0%, transparent 40%),
-        radial-gradient(circle at 90% 80%, rgba(212, 20, 90, 0.1) 0%, transparent 40%),
-        var(--bg);
-}
-
-/* Background grid with a dreamy pulse */
-.bg-grid {
+  }
+  
+  /* Background Grid */
+  .bg-grid {
     position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background-image: linear-gradient(var(--border) 1px, transparent 1px),
-                      linear-gradient(90deg, var(--border) 1px, transparent 1px);
-    background-size: 50px 50px;
-    mask-image: radial-gradient(circle at center, black, transparent 80%);
-    opacity: 0.2;
+    inset: 0;
+    background-image: radial-gradient(rgba(71, 20, 173, 0.15) 1px, transparent 1px);
+    background-size: 30px 30px;
     z-index: -1;
-    animation: gridPulse 8s infinite alternate ease-in-out;
-}
-
-@keyframes gridPulse {
-    from { opacity: 0.1; transform: scale(1); }
-    to { opacity: 0.3; transform: scale(1.05); }
-}
-
-/* --- HEADER & NAVIGATION --- */
-header {
-    padding: 30px 60px;
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--border);
-}
-
-.header-inner {
-    max-width: 1400px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.logo-dot {
-    width: 12px; height: 12px;
-    background: var(--nebula-purple);
-    border-radius: 50%;
-    box-shadow: 0 0 15px var(--nebula-purple);
-}
-
-.logo h1 { font-size: 1.4rem; margin: 0; letter-spacing: 1px; }
-.tagline { font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 3px; margin: 0; }
-
-.back-btn {
-    text-decoration: none;
-    color: var(--text-dim);
-    font-size: 0.9rem;
-    padding: 10px 20px;
-    border-radius: 100px;
-    border: 1px solid var(--border);
-    transition: 0.3s;
-}
-
-.back-btn:hover {
-    color: white;
-    background: var(--glass-bright);
-    border-color: var(--accent-blue);
-}
-
-/* --- MAIN DASHBOARD CONTENT --- */
-main {
-    max-width: 1200px;
-    margin: 60px auto;
-    padding: 0 40px;
-}
-
-.page-title h2 { font-size: 2.5rem; margin-bottom: 10px; font-weight: 700; }
-.page-title p { color: var(--text-dim); font-size: 1.1rem; }
-
-/* --- THE FLOATING ISLANDS (STATS) --- */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    margin: 40px 0;
-}
-
-.stat-card {
+  }
+  
+  /* --- 1. SHARED ISLAND STYLE --- */
+  .island {
     background: var(--glass);
     backdrop-filter: blur(20px);
-    border: 1px solid var(--border);
-    padding: 25px;
+    border: 1px solid var(--glass-border);
     border-radius: 24px;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    animation: floatIsland 4s infinite ease-in-out;
-    animation-delay: calc(var(--i) * 0.2s);
-}
-
-.stat-card:hover {
-    transform: translateY(-10px);
-    background: var(--glass-bright);
-    border-color: var(--nebula-purple);
-}
-
-.stat-label { font-size: 0.8rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin: 0; }
-.stat-number { font-size: 2.5rem; font-weight: 700; margin: 10px 0 0 0; }
-.stat-number.accent { color: var(--accent-blue); }
-.stat-number.danger { color: var(--danger); text-shadow: 0 0 15px rgba(255, 75, 75, 0.3); }
-.stat-number.success { color: var(--success); }
-
-/* --- THE TABLE ISLAND --- */
-.table-card {
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease, border-color 0.3s ease;
+  }
+  
+  .island:hover {
+    border-color: rgba(138, 148, 255, 0.3);
+  }
+  
+  /* --- 2. HEADER --- */
+  header {
+    padding: 20px 5%;
+  }
+  
+  .header-inner {
     background: var(--glass);
-    backdrop-filter: blur(30px);
-    border: 1px solid var(--border);
-    border-radius: 32px;
-    padding: 40px;
-    margin-top: 40px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-}
-
-.table-header {
+    backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 15px 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
-}
-
-table {
+  }
+  
+  .logo h1 {
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+    margin: 0;
+    background: linear-gradient(to right, #fff, #8a94ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .tagline {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+  
+  /* --- 3. MAIN LAYOUT --- */
+  main {
+    display: grid;
+    grid-template-columns: 350px 1fr; 
+    gap: 25px;
+    padding: 0 5% 40px;
+    max-width: 1600px;
+    margin: 0 auto;
+    align-items: start;
+  }
+  
+  .left-col {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  /* --- 4. STATS & TITLES --- */
+  .page-title h2 {
+    font-size: 1.6rem;
+    margin: 0 0 5px 0;
+  }
+  
+  .stats-island {
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+  }
+  
+  .stat-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    margin: 0;
+  }
+  
+  .stat-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 5px 0 0 0;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  
+  .stat-number.pending { color: #8a94ff; }
+  .stat-number.done { color: var(--success); }
+  
+  /* --- 5. FORM INPUTS & BUTTONS --- */
+  .form-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: #8a94ff;
+    margin-bottom: 15px;
+  }
+  
+  input, select {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 12px;
+    color: white;
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 12px;
+    box-sizing: border-box;
+    outline: none;
+    transition: 0.3s;
+  }
+  
+  input:focus, select:focus {
+    border-color: var(--accent);
+    background: rgba(255, 255, 255, 0.07);
+  }
+  
+  /* Glass Buttons */
+  #add-btn, #signout-btn {
+    background: rgba(71, 20, 173, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(138, 148, 255, 0.3);
+    border-radius: 12px;
+    color: white;
+    font-family: 'Sora', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  #add-btn {
+    width: 100%;
+    padding: 14px;
+  }
+  
+  #add-btn:hover, #signout-btn:hover {
+    background: rgba(71, 20, 173, 0.4);
+    border-color: #8a94ff;
+    box-shadow: 0 0 20px var(--accent-glow);
+    transform: translateY(-2px);
+  }
+  
+  #signout-btn {
+    padding: 8px 20px;
+  }
+  
+  /* --- 6. TABLE STYLING --- */
+  .table-card {
+    box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+  }
+  
+  .table-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  
+  .mono-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+  }
+  
+  .dim { color: var(--text-dim); }
+  
+  table {
     width: 100%;
     border-collapse: collapse;
-}
-
-th {
+  }
+  
+  th {
     text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
     color: var(--text-dim);
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    padding: 15px;
-    border-bottom: 1px solid var(--border);
-}
-
-td {
-    padding: 20px 15px;
-    border-bottom: 1px solid rgba(255,255,255,0.03);
-}
-
-.subject { color: var(--accent-blue); font-weight: 600; }
-.mono-cell { font-family: var(--font-mono); font-size: 0.85rem; opacity: 0.8; }
-
-/* Badges & Status */
-.badge {
-    padding: 4px 12px;
-    border-radius: 100px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  td {
+    padding: 16px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    font-size: 0.9rem;
+  }
+  
+  /* Action Buttons inside Table */
+  .complete-btn, .delete-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+    margin-left: 5px;
+  }
+  
+  .complete-btn:hover { border-color: var(--success); color: var(--success); }
+  .delete-btn:hover { border-color: var(--danger); color: var(--danger); }
+  
+  /* Badges */
+  .badge {
+    padding: 4px 8px;
+    border-radius: 6px;
     font-size: 0.7rem;
     font-weight: 700;
     text-transform: uppercase;
-}
-
-.badge-high { background: rgba(255, 75, 75, 0.1); color: var(--danger); border: 1px solid var(--danger); }
-.badge-medium { background: rgba(255, 171, 0, 0.1); color: #ffab00; border: 1px solid #ffab00; }
-.badge-low { background: rgba(255, 255, 255, 0.05); color: var(--text-dim); border: 1px solid var(--border); }
-
-.status {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.9rem;
-}
-
-.status::before {
-    content: '';
-    width: 8px; height: 8px;
-    border-radius: 50%;
-}
-
-.status-pending::before { background: #ffab00; box-shadow: 0 0 10px #ffab00; }
-.status-done::before { background: var(--success); box-shadow: 0 0 10px var(--success); }
-
-/* --- ISLAND FLOATING ANIMATION --- */
-@keyframes floatIsland {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
-}
+  }
+  
+  .badge-high { background: rgba(255, 71, 71, 0.15); color: #ff4747; }
+  .badge-medium { background: rgba(255, 191, 0, 0.15); color: #ffbf00; }
+  .badge-low { background: rgba(0, 255, 157, 0.15); color: #00ff9d; }
+  
+  .status-done { color: var(--success); text-shadow: 0 0 10px rgba(0, 255, 157, 0.3); }
+  
+  /* Done Row Effect */
+  .row-done {
+    opacity: 0.5;
+    filter: grayscale(0.8);
+  }

@@ -16,19 +16,24 @@
 
         * { box-sizing: border-box; }
 
+        /* ENABLE SMOOTH SCROLLING */
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
             margin: 0;
             background-color: var(--bg);
             color: var(--text);
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             height: 100vh;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            /* CHANGED overflow to allow scrolling but keep it clean */
+            overflow-x: hidden;
+            overflow-y: auto; 
+            scroll-snap-type: y proximity;
         }
 
-        /* --- THE VIBRANT COSMOS --- */
+        /* --- THE VIBRANT COSMOS (KEEPING YOUR EXACT SETUP) --- */
         .universe {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -41,30 +46,31 @@
 
         .stars {
             position: absolute;
-            width: 200%; height: 200%;
-            background-image: radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
-                              radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
-                              radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0,0,0,0));
+            width: 150%; height: 150%;
+            background-image: radial-gradient(1px 1px at 30px 40px, #eee, rgba(0,0,0,0)),
+                  radial-gradient(1px 1px at 60px 90px, #fff, rgba(0,0,0,0)),
+                  radial-gradient(1px 1px at 80px 140px, #ddd, rgba(0,0,0,0));
             background-repeat: repeat;
-            background-size: 500px 500px;
+            background-size: 350px 350px;
             opacity: 1;
-            animation: drift 100s linear infinite;
+            animation: drift 10s linear infinite;
         }
 
         @keyframes drift {
             from { transform: translate(0, 0); }
-            to { transform: translate(-10%, -30%); }
+            to { transform: translate(-50%, -50%); }
         }
 
-        /* --- NAV BAR --- */
+        /* --- NAV BAR (Fixed so it stays on top) --- */
         nav {
-            position: absolute;
+            position: fixed;
             top: 0; width: 100%;
             padding: 40px 60px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            z-index: 10;
+            z-index: 100;
+            backdrop-filter: blur(20px);
         }
 
         .nav-links { display: flex; gap: 40px; }
@@ -76,10 +82,19 @@
             transition: 0.3s;
         }
 
-        .nav-links a:hover { color: var(--nebula-purple); text-shadow: 0 0 10px var(--nebula-purple); }
+        .nav-links a:hover { color: #ffffff; text-shadow: 0 0 10px #ffffff; }
 
-        /* --- THE DASHBOARD --- */
-        .scholar-container {
+        /* --- WRAPPING SECTIONS --- */
+        section {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            scroll-snap-align: center;
+        }
+
+        /* --- YOUR EXACT DASHBOARD/ISLAND DESIGN --- */
+        .scholar-container, .island {
             width: 85vw;
             height: 75vh;
             background: var(--glass);
@@ -91,6 +106,14 @@
             padding: 80px;
             box-shadow: 0 0 80px rgba(107, 33, 255, 0.1);
             position: relative;
+            transition: all 0.5s ease; /* For that smooth hover twin */
+        }
+
+        /* THE PURPLE HIGHLIGHT YOU WANTED */
+        .scholar-container:hover, .island:hover {
+            border-color: var(--nebula-purple);
+            box-shadow: 0 0 100px rgba(71, 20, 173, 0.2);
+            background: rgba(255, 255, 255, 0.05);
         }
 
         h1 {
@@ -102,9 +125,15 @@
             -webkit-text-fill-color: transparent;
         }
 
+        h2 {
+            font-size: 4rem;
+            margin: 0;
+            color: #fff;
+        }
+
         .tagline { color: var(--subtext); font-size: 1 rem; margin-top: 20px; max-width: 400px; }
 
-        /* --- THE AUTO-CLICKING ENGINE --- */
+        /* --- THE AUTO-CLICKING ENGINE (YOUR EXACT LOGIC) --- */
         .task-list {
             display: flex;
             flex-direction: column;
@@ -124,7 +153,6 @@
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Autopilot Click Animation Logic */
         .checkbox {
             width: 28px; height: 28px;
             border: 2px solid #444;
@@ -138,14 +166,13 @@
 
         .checkbox::after {
             content: '✓';
-            opacity: 10;
+            opacity: 0; /* Changed to 0 so animation can show it */
             color: white;
             font-weight: 900;
             transform: scale(0.5);
             transition: 0.3s;
         }
 
-        /* Sequential Completion Animation */
         .task-card:nth-child(1) { animation: autoClick 10s infinite 0s; }
         .task-card:nth-child(2) { animation: autoClick 10s infinite 2.5s; }
         .task-card:nth-child(3) { animation: autoClick 10s infinite 5s; }
@@ -153,10 +180,8 @@
         @keyframes autoClick {
             0%, 100% { transform: scale(1); background: rgba(255,255,255,0.02); border-color: var(--border); }
             10%, 40% { transform: scale(1.02); background: rgba(107, 33, 255, 0.1); border-color: var(--nebula-purple); box-shadow: 0 0 30px rgba(107, 33, 255, 0.2); }
-            10%, 40% { /* Nested checkmark state handled by keyframe matching */ }
         }
 
-        /* Target the checkboxes within the animation cycle */
         .task-card:nth-child(1) .checkbox { animation: checkFill 8s infinite 0s; }
         .task-card:nth-child(2) .checkbox { animation: checkFill 8s infinite 2.5s; }
         .task-card:nth-child(3) .checkbox { animation: checkFill 8s infinite 5s; }
@@ -180,7 +205,7 @@
         /* --- PRETTY GLOWS --- */
         .glow-orb {
             position: fixed;
-            width: 400px; height: 400px;
+            width: 600px; height: 600px;
             border-radius: 50%;
             background: var(--nebula-pink);
             filter: blur(80px);
@@ -226,49 +251,76 @@
     <nav>
         <div class="logo" style="font-weight: 900; letter-spacing: 3px;">ScholarFlow</div>
         <div class="nav-links">
-            <a href="#">Home</a>
-            <a href="#">The Dev</a>
-            <a href="#">Contact</a>
+            <a href="#home">Home</a>
+            <a href="#about">About us</a>
+            <a href="#dev">The Dev</a>
         </div>
     </nav>
 
-    <main class="scholar-container">
-        <div class="hero">
-            <h1>Scholar<br>Flow.</h1>
-            <p class="tagline">The automated companion that handles your school tasks while you stay in 'flow'.</p>
-            <a href="dashboard.html">
-                <button class="enter-btn"> Get Started</button>
-              </a>
-               
-             
+    <section id="home">
+        <main class="scholar-container">
+            <div class="hero">
+                <h1>Scholar<br>Flow.</h1>
+                <p class = "tagline"> Your AI powered assistant so you always remain in your flow.</p>
+                        <a href="auth.html" style="text-decoration: none;">
+                            <button class="enter-btn"> Get Started</button>
+                        </a>
+                    </div>
+                </a>
+            
+            </div>
+
+            <div class="task-list">
+                <div class="task-card">
+                    <div class="checkbox"></div>
+                    <div>
+                        <h4 style="margin:0">Organic Chem Prep</h4>
+                        <p style="margin:5px 0 0 0; font-size:0.8rem; color:var(--subtext)">AI is drafting notes...</p>
+                    </div>
+                </div>
+
+                <div class="task-card">
+                    <div class="checkbox"></div>
+                    <div>
+                        <h4 style="margin:0">Literature Review</h4>
+                        <p style="margin:5px 0 0 0; font-size:0.8rem; color:var(--subtext)">Summarizing 4 papers...</p>
+                    </div>
+                </div>
+
+                <div class="task-card">
+                    <div class="checkbox"></div>
+                    <div>
+                        <h4 style="margin:0">Calculus Set #9</h4>
+                        <p style="margin:5px 0 0 0; font-size:0.8rem; color:var(--subtext)">Optimizing solutions...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </section>
+
+    <section id="about">
+        <div class="island">
+            <div>
+                <h2>About Us.</h2>
+                <p class="tagline">ScholarFlow is designed to bring peace to the academic chaos. We use quiet automation to keep you focused on what actually matters.</p>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center; color: var(--subtext); border-left: 1px solid var(--border); padding-left: 40px;">
+                <p>Insert filler words here... Your vision, your rules. Just keep flowing through the cosmos.</p>
+            </div>
         </div>
+    </section>
 
-        <div class="task-list">
-            <div class="task-card">
-                <div class="checkbox"></div>
-                <div>
-                    <h4 style="margin:0">Organic Chem Prep</h4>
-                    <p style="margin:5px 0 0 0; font-size:0.8rem; color:var(--subtext)">AI is drafting notes...</p>
-                </div>
+    <section id="dev">
+        <div class="island">
+            <div style="background: rgba(255,255,255,0.05); border-radius: 20px; height: 100%; display: flex; align-items: center; justify-content: center;">
+                <p style="color: var(--subtext)">[Dev Avatar Here]</p>
             </div>
-
-            <div class="task-card">
-                <div class="checkbox"></div>
-                <div>
-                    <h4 style="margin:0">Literature Review</h4>
-                    <p style="margin:5px 0 0 0; font-size:0.8rem; color:var(--subtext)">Summarizing 4 papers...</p>
-                </div>
-            </div>
-
-            <div class="task-card">
-                <div class="checkbox"></div>
-                <div>
-                    <h4 style="margin:0">Calculus Set #9</h4>
-                    <p style="margin:5px 0 0 0; font-size:0.8rem; color:var(--subtext)">Optimizing solutions...</p>
-                </div>
+            <div style="padding-left: 60px;">
+                <h2>The Dev.</h2>
+                <p class="tagline">Built by a creator obsessed with clean space vibes and automated productivity.</p>
             </div>
         </div>
-    </main>
+    </section>
 
 </body>
 </html>
