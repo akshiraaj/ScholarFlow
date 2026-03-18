@@ -598,7 +598,8 @@ const app2 = initializeApp(aiFirebaseConfig, "ai-assistant");
         });
   
         const data = await response.json();
-        const reply = data.content[0].text;
+        console.log('API response:', data);
+const reply = data.content?.[0]?.text || data.error?.message || "Something went wrong";
         chatHistory.push({ role: "assistant", content: reply });
   
         typingEl.querySelector('p').innerText = reply;
