@@ -5,16 +5,12 @@ export default async function handler(req, res) {
   
     if (req.method === 'OPTIONS') { res.status(200).end(); return; }
   
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    console.log('Key exists:', !!apiKey);
-    console.log('Key starts with:', apiKey?.slice(0, 10));
-  
     try {
       const response = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": apiKey,
+          "x-api-key": "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",
           "anthropic-version": "2023-06-01"
         },
         body: JSON.stringify(req.body)
