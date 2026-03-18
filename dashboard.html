@@ -93,10 +93,9 @@
       </a>
       <div class="nav-right">
         <a href="profile.html" style="display:flex;align-items:center;gap:8px;text-decoration:none;">
-            <div class="avatar" id="nav-avatar">S</div>
-            <span id="welcome-text" class="welcome-text">Scholar</span>
-          </a>
-        
+          <div class="avatar" id="nav-avatar">S</div>
+          <span id="welcome-text" class="welcome-text">Scholar</span>
+        </a>
       </div>
     </div>
   </nav>
@@ -168,17 +167,14 @@
     </div>
   </div>
 
-  <!-- NON-MODULE FUNCTIONS — must come before module script -->
+  <!-- NON-MODULE FUNCTIONS -->
   <script>
     window.deleteSubject = function(id) {
-  window._deleteSubject && window._deleteSubject(id);
-
-};
-
-function toggleAIChat() {
-  document.getElementById('ai-chat-panel').classList.toggle('open');
-}
-
+      window._deleteSubject && window._deleteSubject(id);
+    };
+    function toggleAIChat() {
+      document.getElementById('ai-chat-panel').classList.toggle('open');
+    }
     function openModal()        { document.getElementById('modal-overlay').classList.add('active'); }
     function closeModal()       { document.getElementById('modal-overlay').classList.remove('active'); }
     function openSidebar()      { document.getElementById('subjects-sidebar').classList.add('open'); document.getElementById('sidebar-overlay').classList.add('active'); }
@@ -216,7 +212,6 @@ function toggleAIChat() {
     let subjects       = [];
     let activeSubject  = "All";
 
-    // ── AUTH ──────────────────────────────────────────
     onAuthStateChanged(auth, (user) => {
       if (user) {
         currentUser = user;
@@ -233,9 +228,6 @@ function toggleAIChat() {
       }
     });
 
-    
-
-    // ── SUBJECTS ──────────────────────────────────────
     function loadSubjects(uid) {
       onSnapshot(collection(db, "users", uid, "subjects"), (snapshot) => {
         subjects = [];
@@ -247,7 +239,6 @@ function toggleAIChat() {
     }
 
     function renderSubjectsList() {
-        
       const list = document.getElementById('subjects-list');
       if (subjects.length === 0) {
         list.innerHTML = `<p style="font-size:12px;color:var(--muted);text-align:center;padding:20px 0;">No subjects yet. Add one above!</p>`;
@@ -280,7 +271,7 @@ function toggleAIChat() {
       document.getElementById('new-subject-input').value = "";
     };
 
-    window.deleteSubject = async (id) => {
+    window._deleteSubject = async (id) => {
       await deleteDoc(doc(db, "users", currentUser.uid, "subjects", id));
     };
 
@@ -293,7 +284,6 @@ function toggleAIChat() {
       closeEditSubject();
     };
 
-    // ── TABS ──────────────────────────────────────────
     function rebuildTabs() {
       const container = document.getElementById('tabs-container');
       const allTab = `<div class="tab ${activeSubject === 'All' ? 'active' : ''}" data-subject="All">All</div>`;
@@ -305,7 +295,6 @@ function toggleAIChat() {
         </div>
       `).join('');
       container.innerHTML = allTab + subjectTabs;
-
       container.querySelectorAll('.tab').forEach(tab => {
         tab.onclick = () => {
           activeSubject = tab.dataset.subject;
@@ -318,7 +307,6 @@ function toggleAIChat() {
       });
     }
 
-    // ── GRID COLOR ────────────────────────────────────
     function setGlow(color) {
       const style = document.getElementById('grid-style') || (() => {
         const s = document.createElement('style');
@@ -333,7 +321,6 @@ function toggleAIChat() {
       style.textContent = `.bg-grid { background-image: linear-gradient(rgba(${r},${g},${b},0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(${r},${g},${b},0.06) 1px, transparent 1px) !important; }`;
     }
 
-    // ── ASSIGNMENTS ───────────────────────────────────
     function loadAssignments(uid) {
       const q = query(collection(db, "users", uid, "assignments"), orderBy("dueDate", "asc"));
       onSnapshot(q, (snapshot) => {
@@ -349,14 +336,11 @@ function toggleAIChat() {
       const filtered = activeSubject === "All"
         ? allAssignments
         : allAssignments.filter(a => a.subject === activeSubject);
-
       if (filtered.length === 0) {
         tbody.innerHTML = `<tr><td colspan="6" class="empty-row">No assignments here. Add one!</td></tr>`;
         return;
       }
-
       const subjectColor = (name) => subjects.find(s => s.name === name)?.color || '#60A5FA';
-
       tbody.innerHTML = filtered.map(a => `
         <tr class="${a.status === 'Done' ? 'row-done' : ''}">
           <td><span class="subject-cell" style="color:${subjectColor(a.subject)}">${a.subject}</span></td>
@@ -370,7 +354,6 @@ function toggleAIChat() {
           </td>
         </tr>
       `).join('');
-
       tbody.querySelectorAll('.delete-btn').forEach(btn => {
         btn.onclick = () => deleteAssignment(btn.dataset.id);
       });
@@ -390,7 +373,6 @@ function toggleAIChat() {
       document.getElementById('stat-high').innerText    = high;
     }
 
-    // ── ADD ───────────────────────────────────────────
     document.getElementById('add-btn').onclick = async () => {
       const subject  = document.getElementById('f-subject').value;
       const title    = document.getElementById('f-title').value.trim();
@@ -400,9 +382,9 @@ function toggleAIChat() {
       await addDoc(collection(db, "users", currentUser.uid, "assignments"), {
         subject, title, dueDate, priority, status: "Pending"
       });
-      document.getElementById('f-subject').value = "";
-      document.getElementById('f-title').value   = "";
-      document.getElementById('f-date').value    = "";
+      document.getElementById('f-subject').value  = "";
+      document.getElementById('f-title').value    = "";
+      document.getElementById('f-date').value     = "";
       document.getElementById('f-priority').value = "";
       closeModal();
     };
@@ -416,7 +398,6 @@ function toggleAIChat() {
       await updateDoc(doc(db, "users", currentUser.uid, "assignments", id), { status: newStatus });
     }
 
-    // ── FILE UPLOAD ───────────────────────────────────
     document.getElementById('file-input').onchange = (e) => {
       const file = e.target.files[0];
       if (file) {
@@ -427,24 +408,17 @@ function toggleAIChat() {
 
     document.getElementById('generate-btn').onclick = () => {
       document.getElementById('notes-box').innerHTML =
-        `<p class="notes-placeholder" style="color:#60A5FA">AI notes coming soon!<br>Add your Claude API key to activate.</p>`;
+        `<p class="notes-placeholder" style="color:#60A5FA">AI notes coming soon!</p>`;
     };
 
-    // ── HELPERS ───────────────────────────────────────
     function formatDate(dateStr) {
       if (!dateStr) return "";
       const [y, m, d] = dateStr.split("-");
       const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
       return `${months[parseInt(m)-1]} ${parseInt(d)}, ${y}`;
-
-
     }
-
-    // --- FOR DELETING SUBJECTS ---
-    window._deleteSubject = async (id) => {
-  await deleteDoc(doc(db, "users", currentUser.uid, "subjects", id));
-};
   </script>
+
   <!-- FLOATING AI ASSISTANT -->
   <div id="ai-bubble" onclick="toggleAIChat()" title="AI Study Assistant">
     <svg width="22" height="22" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
@@ -458,60 +432,54 @@ function toggleAIChat() {
   <div id="ai-chat-panel" class="ai-chat-panel">
     <div class="ai-chat-header">
       <div>
-        <p class="ai-chat-title">ScholarFlow AI</p>
+        <p class="ai-chat-title">Flow ✦</p>
         <p class="ai-chat-sub">Your personal study assistant</p>
       </div>
       <button class="ai-chat-close" onclick="toggleAIChat()">✕</button>
     </div>
-  
     <div class="ai-quick-actions">
       <button class="ai-quick-btn" onclick="sendQuickAction('prioritize')">📊 Prioritize</button>
       <button class="ai-quick-btn" onclick="sendQuickAction('schedule')">📅 Schedule</button>
       <button class="ai-quick-btn" onclick="sendQuickAction('tips')">💡 Study Tips</button>
     </div>
-  
     <div class="ai-messages" id="ai-messages">
       <div class="ai-msg ai">
-        <p>Hey! I'm your ScholarFlow AI assistant. I can see your assignments and help you study smarter. What do you need?</p>
+        <p>Hey! I'm Flow, your ScholarFlow study assistant. I can see your assignments and help you study smarter. What do you need?</p>
       </div>
     </div>
-  
     <div class="ai-upload-row">
       <button class="ai-upload-btn" onclick="document.getElementById('ai-file-input').click()">📄 Upload PDF</button>
       <span id="ai-file-label" style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;"></span>
       <input type="file" id="ai-file-input" accept=".pdf,image/*" style="display:none"/>
     </div>
-  
     <div class="ai-input-row">
       <input id="ai-input" type="text" placeholder="Ask anything..." onkeydown="if(event.key==='Enter')sendAIMessage()"/>
       <button class="ai-send-btn" onclick="sendAIMessage()">→</button>
     </div>
   </div>
 
+  <!-- AI MODULE -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-  
-    const aiFirebaseConfig = {
-  apiKey: "AIzaSyCOEb8cFTGdpQrIgjUjqQCGI4q1z96XIkA",
-  authDomain: "scholarflow-28cf0.firebaseapp.com",
-  projectId: "scholarflow-28cf0",
-  storageBucket: "scholarflow-28cf0.firebasestorage.app",
-  messagingSenderId: "126752346207",
-  appId: "1:126752346207:web:92b8026906a4b97bfacbea"
-};
 
-const app2 = initializeApp(aiFirebaseConfig, "ai-assistant");
+    const aiFirebaseConfig = {
+      apiKey: "AIzaSyCOEb8cFTGdpQrIgjUjqQCGI4q1z96XIkA",
+      authDomain: "scholarflow-28cf0.firebaseapp.com",
+      projectId: "scholarflow-28cf0",
+      storageBucket: "scholarflow-28cf0.firebasestorage.app",
+      messagingSenderId: "126752346207",
+      appId: "1:126752346207:web:92b8026906a4b97bfacbea"
+    };
+
+    const app2  = initializeApp(aiFirebaseConfig, "ai-assistant");
     const auth2 = getAuth(app2);
     const db2   = getFirestore(app2);
-  
-    
-    let chatHistory = [];
+
+    let chatHistory     = [];
     let userAssignments = [];
-    let uploadedFile = null;
-  
-    // load assignments for context
+
     onAuthStateChanged(auth2, (user) => {
       if (!user) return;
       const q = query(collection(db2, "users", user.uid, "assignments"), orderBy("dueDate", "asc"));
@@ -519,14 +487,7 @@ const app2 = initializeApp(aiFirebaseConfig, "ai-assistant");
         userAssignments = snap.docs.map(d => d.data());
       });
     });
-  
-    // file upload
-    document.getElementById('ai-file-input').onchange = (e) => {
-      uploadedFile = e.target.files[0];
-      document.getElementById('ai-file-label').innerText = uploadedFile ? uploadedFile.name : '';
-    };
-  
-    // quick actions
+
     window.sendQuickAction = (type) => {
       const prompts = {
         prioritize: "Look at my assignments and tell me which ones I should work on first and why. Be specific and practical.",
@@ -534,96 +495,74 @@ const app2 = initializeApp(aiFirebaseConfig, "ai-assistant");
         tips:       "Give me 5 specific study tips tailored to my current subjects and workload."
       };
       sendMessage(prompts[type]);
-
     };
-  
-    // send message
+
     window.sendAIMessage = () => {
       const input = document.getElementById('ai-input');
-      const text = input.value.trim();
+      const text  = input.value.trim();
       if (!text) return;
       input.value = "";
       sendMessage(text);
     };
-  
-    async function sendMessage(text) {
 
+    async function sendMessage(text) {
       appendMessage(text, 'user');
-  
       const typingEl = appendMessage('Thinking...', 'ai', true);
-  
+
       const assignmentContext = userAssignments.length > 0
         ? `The student has these assignments:\n${userAssignments.map(a =>
             `- ${a.subject}: "${a.title}" due ${a.dueDate}, priority: ${a.priority}, status: ${a.status}`
           ).join('\n')}`
         : "The student has no assignments yet.";
-  
-      const systemPrompt = `You are ScholarFlow AI, a smart and friendly study assistant built into a student homework tracker app. You have access to the student's real assignment data.
-  
-  ${assignmentContext}
-  
-  Be concise, helpful, and encouraging. Use bullet points when listing things. Keep responses under 200 words unless building a schedule. Never use markdown headers.`;
-  
+
+      const systemPrompt = `You are Flow, a smart and friendly AI study assistant built into ScholarFlow, a student homework tracker. You have access to the student's real assignment data.
+
+${assignmentContext}
+
+Be concise, helpful, and encouraging. Use bullet points when listing things. Keep responses under 200 words unless building a schedule. Never use markdown headers.`;
+
       chatHistory.push({ role: "user", content: text });
-  
+
       try {
-        let messageContent = [{ type: "text", text }];
-  
-        if (uploadedFile) {
-          const base64 = await fileToBase64(uploadedFile);
-          const isPDF = uploadedFile.type === 'application/pdf';
-          messageContent = [
-            isPDF
-              ? { type: "document", source: { type: "base64", media_type: "application/pdf", data: base64 } }
-              : { type: "image", source: { type: "base64", media_type: uploadedFile.type, data: base64 } },
-            { type: "text", text: text || "Generate concise study notes from this file." }
-          ];
-          uploadedFile = null;
-          document.getElementById('ai-file-label').innerText = '';
-        }
-  
-       
-            const response = await fetch("/api/chat", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    system: systemPrompt,
-    messages: chatHistory
-  })
-});
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            system: systemPrompt,
+            messages: chatHistory
+          })
+        });
 
-const data = await response.json();
-const reply = data.choices?.[0]?.message?.content || "Something went wrong!";
-chatHistory.push({ role: "assistant", content: reply });
+        const data = await response.json();
+        console.log('API response:', data);
+        const reply = data.choices?.[0]?.message?.content || "Something went wrong — try again!";
+        chatHistory.push({ role: "assistant", content: reply });
+        typingEl.querySelector('p').innerText = reply;
+        typingEl.classList.remove('ai-typing');
 
-typingEl.querySelector('p').innerText = reply;
-typingEl.classList.remove('ai-typing');
-   
+      } catch (err) {
+        console.error('Error:', err);
+        typingEl.querySelector('p').innerText = "Something went wrong. Try again!";
+      }
+
+      scrollMessages();
     }
-  
+
     function appendMessage(text, role, isTyping = false) {
       const messages = document.getElementById('ai-messages');
-      const div = document.createElement('div');
-      div.className = `ai-msg ${role}${isTyping ? ' ai-typing' : ''}`;
-      div.innerHTML = `<p>${text}</p>`;
+      const div      = document.createElement('div');
+      div.className  = `ai-msg ${role}${isTyping ? ' ai-typing' : ''}`;
+      div.innerHTML  = `<p>${text}</p>`;
       messages.appendChild(div);
       scrollMessages();
       return div;
     }
-  
+
     function scrollMessages() {
       const el = document.getElementById('ai-messages');
       el.scrollTop = el.scrollHeight;
     }
-  
-    function fileToBase64(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result.split(',')[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
   </script>
+
 </body>
 </html>
