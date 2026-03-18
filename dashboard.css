@@ -1,5 +1,111 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* --- PROFILE DROPDOWN --- */
+.user-menu {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 12px;
+    transition: 0.2s;
+}
 
+.user-menu:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.avatar {
+    width: 35px;
+    height: 35px;
+    background: var(--electric-blue);
+    color: white;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+}
+
+.dropdown-island {
+    position: absolute;
+    top: 60px;
+    right: 0;
+    width: 280px;
+    background: var(--navy-surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    display: none; /* Hidden by default */
+    flex-direction: column;
+    gap: 15px;
+    z-index: 1001;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
+.dropdown-island.active {
+    display: flex;
+}
+
+.dropdown-header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 15px;
+}
+
+.profile-email {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    display: block;
+}
+
+.mini-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    background: rgba(255,255,255,0.02);
+    padding: 10px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.mini-stats span {
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.mini-stats p {
+    margin: 2px 0 0;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.dropdown-field {
+    font-size: 0.8rem;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.save-btn {
+    background: var(--electric-blue);
+    color: white;
+    border: none;
+    padding: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+/* Toggle Switch Styling */
+.theme-switch {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+}
 :root {
   --bg:      #050D18;
   --surface: #070F1C;
