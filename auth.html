@@ -1,138 +1,242 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet"/>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><polygon points='16,4 28,10 16,16 4,10' fill='%232563EB'/><rect x='4' y='16' width='24' height='3' fill='%231E3A5F'/><line x1='28' y1='10' x2='28' y2='24' stroke='%2360A5FA' stroke-width='2' stroke-linecap='round'/><circle cx='28' cy='26' r='2' fill='%2360A5FA'/></svg>">    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ScholarFlow — Entry</title>
     <style>
         :root {
-            --bg: #030208;
-            --nebula-purple: #4714ad;
-            --glass: rgba(255, 255, 255, 0.03);
-            --border: rgba(255, 255, 255, 0.1);
+            --bg: #050D18;
+            --electric-blue: #2563EB;
+            --glass: rgba(37, 99, 235, 0.04);
+            --border: rgba(37, 99, 235, 0.12);
             --text: #ffffff;
-            --subtext: #a0a0c0;
+            --subtext: #8A95A7;
         }
-
+    
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+    
         body {
             margin: 0;
             background-color: var(--bg);
             color: var(--text);
-            font-family: 'Inter', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
         }
-
+    
         .universe {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 15% 15%, rgba(28, 23, 172, 0.15) 0%, transparent 40%), black;
+            background: radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.08) 0%, transparent 60%);
             z-index: -2;
         }
-
+    
+        /* grid background */
+        .universe::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(37,99,235,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(37,99,235,0.04) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: -1;
+        }
+    
         .auth-card {
-            width: 400px;
-            background: var(--glass);
+            width: 420px;
+            background: rgba(7, 15, 28, 0.8);
             backdrop-filter: blur(40px);
             border: 1px solid var(--border);
-            border-radius: 30px;
-            padding: 40px;
-            box-shadow: 0 0 80px rgba(107, 33, 255, 0.1);
+            border-radius: 20px;
+            padding: 44px;
             text-align: center;
-            transition: 0.5s;
+            transition: border-color 0.3s;
         }
-
+    
         .auth-card:hover {
-            border-color: var(--nebula-purple);
-            box-shadow: 0 0 100px rgba(71, 20, 173, 0.2);
+            border-color: rgba(37, 99, 235, 0.3);
         }
-
-        h2 { font-size: 2rem; margin-bottom: 10px; }
-        p { color: var(--subtext); margin-bottom: 30px; font-size: 0.9rem; }
-
-        .input-group { margin-bottom: 20px; text-align: left; }
-        label { display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--subtext); margin-bottom: 8px; }
-        
+    
+        /* logo in card */
+        .card-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 28px;
+        }
+    
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            letter-spacing: -0.03em;
+        }
+    
+        p {
+            color: var(--subtext);
+            margin-bottom: 28px;
+            font-size: 0.85rem;
+        }
+    
+        .input-group { margin-bottom: 16px; text-align: left; }
+    
+        label {
+            display: block;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--subtext);
+            margin-bottom: 8px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+    
         input {
             width: 100%;
-            padding: 12px 16px;
-            background: rgba(255, 255, 255, 0.05);
+            padding: 11px 16px;
+            background: rgba(255,255,255,0.03);
             border: 1px solid var(--border);
-            border-radius: 12px;
+            border-radius: 10px;
             color: white;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.9rem;
             outline: none;
-            transition: 0.3s;
+            transition: 0.2s;
         }
-
-        input:focus { border-color: var(--nebula-purple); background: rgba(255, 255, 255, 0.1); }
-
+    
+        input:focus {
+            border-color: var(--electric-blue);
+            background: rgba(37,99,235,0.05);
+        }
+    
+        input::placeholder { color: #3a4a5c; }
+    
         .auth-btn {
             width: 100%;
-            padding: 14px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            background: var(--nebula-purple);
+            padding: 13px;
+            border-radius: 10px;
+            border: none;
+            background: var(--electric-blue);
             color: white;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             font-weight: 600;
+            font-size: 0.9rem;
             cursor: pointer;
-            transition: 0.3s;
-            margin-top: 10px;
+            transition: 0.2s;
+            margin-top: 8px;
         }
-
-        /* Google Button Style */
+    
+        .auth-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+        .auth-btn:active { transform: scale(0.98); }
+    
         .google-btn {
             width: 100%;
-            padding: 12px;
-            border-radius: 12px;
+            padding: 11px;
+            border-radius: 10px;
             border: 1px solid var(--border);
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255,255,255,0.03);
             color: white;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
             cursor: pointer;
             margin-bottom: 20px;
-            transition: 0.3s;
+            transition: 0.2s;
         }
-
-        .google-btn:hover { background: rgba(255, 255, 255, 0.1); }
-
+    
+        .google-btn:hover {
+            background: rgba(255,255,255,0.07);
+            border-color: rgba(255,255,255,0.2);
+        }
+    
+        .divider {
+            margin-bottom: 20px;
+            color: var(--subtext);
+            font-size: 0.78rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+    
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+    
         .toggle-link {
             margin-top: 20px;
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             color: var(--subtext);
             cursor: pointer;
         }
-
-        .toggle-link span { color: white; text-decoration: underline; }
+    
+        .toggle-link span {
+            color: #60A5FA;
+            text-decoration: none;
+            font-weight: 500;
+        }
+    
+        .back-link {
+            position: fixed;
+            top: 24px;
+            left: 32px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--subtext);
+            text-decoration: none;
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 999px;
+            transition: 0.2s;
+        }
+    
+        .back-link:hover { color: white; border-color: rgba(37,99,235,0.4); }
     </style>
 </head>
 <body>
-
     <div class="universe"></div>
 
+    <a href="index.html" class="back-link">← Back</a>
+
     <div class="auth-card">
-        <h2 id="auth-title">Welcome Back</h2>
-        <p id="auth-subtitle">Sync with ScholarFlow.</p>
+
+        <div class="card-logo">
+            <svg width="185" height="22" viewBox="0 0 260 40" style="display:block;" xmlns="http://www.w3.org/2000/svg">
+                <polygon points="16,8 28,14 16,20 4,14" fill="#2563EB" opacity="0.9"/>
+                <rect x="4" y="20" width="24" height="3" rx="0" fill="#1E3A5F"/>
+                <line x1="28" y1="14" x2="28" y2="28" stroke="#60A5FA" stroke-width="1.5" stroke-linecap="round"/>
+                <circle cx="28" cy="30" r="2" fill="#60A5FA"/>
+                <text x="42" y="26" font-family="'Plus Jakarta Sans', sans-serif" font-weight="600" font-size="18" fill="#F0F6FF" letter-spacing="-0.03em">ScholarFlow</text>
+              </svg>
+        </div>
+
+        <h2 id="auth-title">Welcome back</h2>
+        <p id="auth-subtitle">Sign in to your workspace.</p>
 
         <button class="google-btn" id="google-login">
             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
-            Google
+            Continue with Google
         </button>
 
-        <div style="margin-bottom: 20px; color: var(--subtext); font-size: 0.8rem;">or use email</div>
+        <div class="divider">or use email</div>
 
         <div class="input-group">
             <label>Email Address</label>
-            <input type="email" id="email" placeholder="name@scholarflow.space">
+            <input type="email" id="email" placeholder="you@email.com">
         </div>
 
         <div class="input-group">
-            <label>Access Key</label>
+            <label>Password</label>
             <input type="password" id="password" placeholder="••••••••">
         </div>
 
@@ -141,8 +245,8 @@
         <div class="toggle-link" id="auth-toggle">
             Don't have an account? <span>Sign Up</span>
         </div>
-    </div>
 
+    </div>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
