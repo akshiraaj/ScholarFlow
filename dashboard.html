@@ -534,6 +534,7 @@ const app2 = initializeApp(aiFirebaseConfig, "ai-assistant");
         tips:       "Give me 5 specific study tips tailored to my current subjects and workload."
       };
       sendMessage(prompts[type]);
+
     };
   
     // send message
@@ -546,6 +547,7 @@ const app2 = initializeApp(aiFirebaseConfig, "ai-assistant");
     };
   
     async function sendMessage(text) {
+
       appendMessage(text, 'user');
   
       const typingEl = appendMessage('Thinking...', 'ai', true);
@@ -580,37 +582,23 @@ const app2 = initializeApp(aiFirebaseConfig, "ai-assistant");
           document.getElementById('ai-file-label').innerText = '';
         }
   
-        const response = await fetch("/api/chat", {
+       
+            const response = await fetch("/api/chat", {
   method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
-          body: JSON.stringify({
-            model: "claude-sonnet-4-20250514",
-            max_tokens: 1000,
-            system: systemPrompt,
-            messages: chatHistory.map((m, i) =>
-              i === chatHistory.length - 1
-                ? { role: "user", content: messageContent }
-                : m
-            )
-          })
-        });
-  
-        const data = await response.json();
-        console.log('API response:', data);
-const reply = data.content?.[0]?.text || data.error?.message || "Something went wrong";
-        chatHistory.push({ role: "assistant", content: reply });
-  
-        typingEl.querySelector('p').innerText = reply;
-        typingEl.classList.remove('ai-typing');
-  
-      } catch (err) {
-        typingEl.querySelector('p').innerText = "Something went wrong. Check your API key!";
-        console.error(err);
-      }
-  
-      scrollMessages();
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    system: systemPrompt,
+    messages: chatHistory
+  })
+});
+
+const data = await response.json();
+const reply = data.choices?.[0]?.message?.content || "Something went wrong!";
+chatHistory.push({ role: "assistant", content: reply });
+
+typingEl.querySelector('p').innerText = reply;
+typingEl.classList.remove('ai-typing');
+   
     }
   
     function appendMessage(text, role, isTyping = false) {
