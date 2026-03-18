@@ -10,7 +10,7 @@ export default async function handler(req, res) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": "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",
+          "x-api-key": process.env.ANTHROPIC_API_KEY,
           "anthropic-version": "2023-06-01"
         },
         body: JSON.stringify(req.body)
@@ -20,4 +20,10 @@ export default async function handler(req, res) {
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
+    export default function handler(req, res) {
+        res.json({ 
+          keyExists: !!process.env.ANTHROPIC_API_KEY,
+          keyStart: process.env.ANTHROPIC_API_KEY?.slice(0, 15)
+        });
+      }
   }
