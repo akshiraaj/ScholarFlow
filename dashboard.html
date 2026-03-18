@@ -170,6 +170,9 @@
 
   <!-- NON-MODULE FUNCTIONS — must come before module script -->
   <script>
+    window.deleteSubject = function(id) {
+  window._deleteSubject && window._deleteSubject(id);
+};
     function openModal()        { document.getElementById('modal-overlay').classList.add('active'); }
     function closeModal()       { document.getElementById('modal-overlay').classList.remove('active'); }
     function openSidebar()      { document.getElementById('subjects-sidebar').classList.add('open'); document.getElementById('sidebar-overlay').classList.add('active'); }
@@ -224,9 +227,7 @@
       }
     });
 
-    document.getElementById('signout-btn').onclick = () => {
-      signOut(auth).then(() => window.location.href = "index.html");
-    };
+    
 
     // ── SUBJECTS ──────────────────────────────────────
     function loadSubjects(uid) {
@@ -240,6 +241,7 @@
     }
 
     function renderSubjectsList() {
+        
       const list = document.getElementById('subjects-list');
       if (subjects.length === 0) {
         list.innerHTML = `<p style="font-size:12px;color:var(--muted);text-align:center;padding:20px 0;">No subjects yet. Add one above!</p>`;
@@ -428,7 +430,14 @@
       const [y, m, d] = dateStr.split("-");
       const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
       return `${months[parseInt(m)-1]} ${parseInt(d)}, ${y}`;
+
+
     }
+
+    // --- FOR DELETING SUBJECTS ---
+    window._deleteSubject = async (id) => {
+  await deleteDoc(doc(db, "users", currentUser.uid, "subjects", id));
+};
   </script>
 
 </body>
