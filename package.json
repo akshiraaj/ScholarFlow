@@ -20,6 +20,6 @@
   "homepage": "https://github.com/akshiraaj/scholarflow#readme",
   "dependencies": {
     "node-fetch": "^2.7.0",
-    "pdf-parse": "^2.4.5"
+    "pdf-parse": "^1.1.1"
   }
 }
