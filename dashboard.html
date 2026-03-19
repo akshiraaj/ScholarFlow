@@ -468,39 +468,40 @@
     const reader = new FileReader();
     reader.onload = async (e) => {
       try {
-        if (file.type === 'application/pdf') {
-          // Load pdf.js from unpkg instead
-          if (!window.pdfjsLib) {
-            await new Promise((res, rej) => {
-              const script = document.createElement('script');
-              script.src = 'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js';
-              script.onload = res;
-              script.onerror = rej;
-              document.head.appendChild(script);
-            });
-            window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
-          }
-          const pdf = await window.pdfjsLib.getDocument({ data: e.target.result }).promise;
-          let text = '';
-          for (let i = 1; i <= Math.min(pdf.numPages, 10); i++) {
-            const page    = await pdf.getPage(i);
-            const content = await page.getTextContent();
-            text += content.items.map(item => item.str).join(' ') + '\n';
-          }
-          resolve(text || "Could not extract text from this PDF.");
-        } else {
-          resolve(e.target.result);
-        }
+        const base64 = e.target.result.split(',')[1];
+        const response = await fetch('/api/extract', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ base64, mimeType: file.type })
+        });
+        const data = await response.json();
+        if (data.error) throw new Error(data.error);
+        resolve(data.text || "Could not extract text.");
       } catch (err) {
-        console.error('PDF error full:', err.message, err.stack);
-        reject(new Error("Could not read file: " + err.message));
+        reject(err);
       }
     };
     reader.onerror = reject;
-    if (file.type === 'application/pdf') reader.readAsArrayBuffer(file);
-    else reader.readAsText(file);
+    reader.readAsDataURL(file);
   });
 }
+if (file.type === 'application/pdf') {
+  const pdf = await window.pdfjsLib.getDocument({ data: e.target.result }).promise;
+  let text = '';
+  for (let i = 1; i <= Math.min(pdf.numPages, 10); i++) {
+    const page    = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    text += content.items.map(item => item.str).join(' ') + '\n';
+  }
+  resolve(text || "Could not extract text from this PDF.");
+} else {
+  resolve(e.target.result);
+}
+    ;
+    reader.onerror = reject;
+    if (file.type === 'application/pdf') reader.readAsArrayBuffer(file);
+    else reader.readAsText(file);
+  
 
     function renderFlashcards(text) {
       const cards = [];
