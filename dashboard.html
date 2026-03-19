@@ -160,13 +160,13 @@
           <input type="file" id="file-input" accept=".pdf,image/*" style="display:none"/>
           <p class="file-name" id="file-name"></p>
         </div>
-        <button class="generate-btn" id="generate-btn" disabled>Generate Notes</button>
+        <button class="generate-btn" id="generate-btn" disabled>Generate</button>
       </div>
       <div class="ai-right">
         <p class="ai-title">Generated Notes</p>
-        <p class="ai-sub">Your AI-generated study notes will appear here</p>
+        <p class="ai-sub">Your AI-generated study materials will appear here</p>
         <div class="notes-box" id="notes-box">
-          <p class="notes-placeholder">Upload a file and hit Generate Notes<br>to get smart study notes for this subject</p>
+          <p class="notes-placeholder">Upload a file and hit Generate<br>to get smart study materials</p>
         </div>
       </div>
     </div>
@@ -412,221 +412,171 @@
     };
 
     document.getElementById('generate-btn').onclick = async () => {
-  const file = document.getElementById('file-input').files[0];
-  const mode = document.getElementById('notes-mode').value;
-  if (!file) return;
-
-  const btn = document.getElementById('generate-btn');
-  btn.disabled = true;
-  btn.innerText = 'Generating...';
-
-  document.getElementById('notes-box').innerHTML =
-    `<p class="notes-placeholder" style="color:#60A5FA">Reading your file...</p>`;
-
-  try {
-    const text = await extractTextFromPDF(file);
-
-    const prompts = {
-      mcq: `Generate 5 multiple choice questions from this content. Format each as:
+      const file = document.getElementById('file-input').files[0];
+      const mode = document.getElementById('notes-mode').value;
+      if (!file) return;
+      const btn = document.getElementById('generate-btn');
+      btn.disabled = true;
+      btn.innerText = 'Generating...';
+      document.getElementById('notes-box').innerHTML =
+        `<p class="notes-placeholder" style="color:#60A5FA">Reading your file...</p>`;
+      try {
+        const text = await extractTextFromFile(file);
+        const prompts = {
+          mcq: `Generate 5 multiple choice questions from this content. Format each exactly as:
 Q: [question]
 A) [option]
 B) [option]
 C) [option]
 D) [option]
-Answer: [correct letter]
+Answer: [correct letter only]
 
 Content: ${text.slice(0, 3000)}`,
-      flashcards: `Generate 8 flashcards from this content. Format each as:
+          flashcards: `Generate 8 flashcards from this content. Format each exactly as:
 FRONT: [concept or term]
 BACK: [definition or explanation]
 
 Content: ${text.slice(0, 3000)}`,
-      notes: `Generate concise bullet point study notes from this content. Group by topic.
-
-Content: ${text.slice(0, 3000)}`
+          notes: `Generate concise bullet point study notes from this content. Group by topic. Content: ${text.slice(0, 3000)}`
+        };
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            system: "You are a study assistant that generates high quality study materials. Be clear, accurate and follow the exact format requested.",
+            messages: [{ role: "user", content: prompts[mode] }]
+          })
+        });
+        const data = await response.json();
+        const result = data.choices?.[0]?.message?.content || "Something went wrong!";
+        if (mode === 'flashcards') renderFlashcards(result);
+        else if (mode === 'mcq') renderMCQ(result);
+        else document.getElementById('notes-box').innerHTML =
+          `<div style="font-size:13px;color:var(--text);line-height:1.8;white-space:pre-wrap;">${result}</div>`;
+      } catch (err) {
+        document.getElementById('notes-box').innerHTML =
+          `<p class="notes-placeholder" style="color:#f87171">Error: ${err.message}</p>`;
+      }
+      btn.disabled = false;
+      btn.innerText = 'Generate';
     };
 
-    const response = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        system: "You are a study assistant that generates high quality study materials from student notes and textbooks. Be clear, accurate and educational.",
-        messages: [{ role: "user", content: prompts[mode] }]
-      })
-    });
-
-    const data = await response.json();
-    const result = data.choices?.[0]?.message?.content || "Something went wrong!";
-
-    if (mode === 'flashcards') {
-      renderFlashcards(result);
-    } else if (mode === 'mcq') {
-      renderMCQ(result);
-    } else {
-      document.getElementById('notes-box').innerHTML =
-        `<div style="font-size:13px;color:var(--text);line-height:1.8;white-space:pre-wrap;">${result}</div>`;
-    }
-
-  } catch (err) {
-    document.getElementById('notes-box').innerHTML =
-      `<p class="notes-placeholder" style="color:#f87171">Error: ${err.message}</p>`;
-  }
-
-  btn.disabled = false;
-  btn.innerText = 'Generate';
-};
-
-function renderFlashcards(text) {
-  const cards = [];
-  const lines = text.split('\n');
-  let current = {};
-  lines.forEach(line => {
-    if (line.startsWith('FRONT:')) current.front = line.replace('FRONT:', '').trim();
-    if (line.startsWith('BACK:'))  { current.back = line.replace('BACK:', '').trim(); if (current.front) cards.push({...current}); current = {}; }
-  });
-
-  if (cards.length === 0) {
-    document.getElementById('notes-box').innerHTML = `<div style="font-size:13px;color:var(--text);white-space:pre-wrap;">${text}</div>`;
-    return;
-  }
-
-  let currentCard = 0;
-  const render = () => {
-    const card = cards[currentCard];
-    document.getElementById('notes-box').innerHTML = `
-      <div style="display:flex;flex-direction:column;gap:12px;height:100%;">
-        <div style="font-size:11px;color:var(--muted);text-align:center;font-family:'JetBrains Mono',monospace;">${currentCard + 1} / ${cards.length}</div>
-        <div id="flashcard" onclick="this.classList.toggle('flipped')" style="cursor:pointer;background:rgba(37,99,235,0.06);border:1px solid rgba(37,99,235,0.15);border-radius:12px;padding:24px;text-align:center;min-height:120px;display:flex;align-items:center;justify-content:center;transition:0.3s;">
-          <div>
-            <p style="font-size:11px;color:var(--muted);margin-bottom:8px;">FRONT — click to reveal</p>
-            <p style="font-size:14px;color:var(--text);font-weight:500;" id="card-text">${card.front}</p>
-          </div>
-        </div>
-        <div style="display:flex;gap:8px;justify-content:center;">
-          <button onclick="(${currentCard} > 0) && (window._cardNav(${currentCard - 1}))" style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:7px;padding:6px 16px;color:var(--muted);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;">← Prev</button>
-          <button onclick="window._cardNav(${currentCard + 1 < cards.length ? currentCard + 1 : currentCard})" style="background:rgba(37,99,235,0.1);border:1px solid rgba(37,99,235,0.2);border-radius:7px;padding:6px 16px;color:#60A5FA;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;">Next →</button>
-        </div>
-      </div>
-    `;
-    const fc = document.getElementById('flashcard');
-    if (fc) {
-      fc.onclick = () => {
-        const t = document.getElementById('card-text');
-        const hint = fc.querySelector('p');
-        if (t.innerText === card.front) { t.innerText = card.back; if(hint) hint.innerText = 'BACK'; }
-        else { t.innerText = card.front; if(hint) hint.innerText = 'FRONT — click to reveal'; }
-      };
-    }
-  };
-  window._cardNav = (idx) => { currentCard = idx; render(); };
-  render();
-}
-
-function renderMCQ(text) {
-  const questions = text.split(/Q:/).filter(q => q.trim());
-  let score = 0;
-  let answered = 0;
-
-  const html = questions.map((q, i) => {
-    const lines = q.trim().split('\n').filter(l => l.trim());
-    const question = lines[0];
-    const options  = lines.slice(1).filter(l => /^[A-D]\)/.test(l.trim()));
-    const answerLine = lines.find(l => l.startsWith('Answer:'));
-    const answer = answerLine ? answerLine.replace('Answer:', '').trim() : '';
-
-    return `
-      <div class="mcq-item" style="margin-bottom:16px;padding:14px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:10px;">
-        <p style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:10px;">${i+1}. ${question}</p>
-        ${options.map(opt => `
-          <button onclick="window._checkAnswer(this,'${answer}','${opt[0]}')" 
-            style="display:block;width:100%;text-align:left;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:7px;padding:8px 12px;color:var(--muted);font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;cursor:pointer;margin-bottom:6px;transition:0.15s;">
-            ${opt.trim()}
-          </button>
-        `).join('')}
-      </div>
-    `;
-  }).join('');
-
-  document.getElementById('notes-box').innerHTML = `<div style="overflow-y:auto;max-height:300px;">${html}</div>`;
-
-  window._checkAnswer = (btn, correct, chosen) => {
-    const siblings = btn.parentElement.querySelectorAll('button');
-    siblings.forEach(b => b.disabled = true);
-    if (chosen === correct) {
-      btn.style.background = 'rgba(16,185,129,0.15)';
-      btn.style.borderColor = 'rgba(16,185,129,0.3)';
-      btn.style.color = '#34d399';
-    } else {
-      btn.style.background = 'rgba(244,63,94,0.1)';
-      btn.style.borderColor = 'rgba(244,63,94,0.2)';
-      btn.style.color = '#f87171';
-      siblings.forEach(b => {
-        if (b.innerText.trim().startsWith(correct)) {
-          b.style.background = 'rgba(16,185,129,0.15)';
-          b.style.borderColor = 'rgba(16,185,129,0.3)';
-          b.style.color = '#34d399';
-        }
+    async function extractTextFromFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          try {
+            if (file.type === 'application/pdf') {
+              const pdfjsLib = await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.mjs');
+              pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.mjs';
+              const pdf = await pdfjsLib.getDocument({ data: e.target.result }).promise;
+              let text = '';
+              for (let i = 1; i <= Math.min(pdf.numPages, 10); i++) {
+                const page = await pdf.getPage(i);
+                const content = await page.getTextContent();
+                text += content.items.map(item => item.str).join(' ') + '\n';
+              }
+              resolve(text || "Could not extract text from PDF.");
+            } else {
+              resolve(e.target.result);
+            }
+          } catch (err) {
+            reject(new Error("Could not read file. Try a different file!"));
+          }
+        };
+        reader.onerror = reject;
+        if (file.type === 'application/pdf') reader.readAsArrayBuffer(file);
+        else reader.readAsText(file);
       });
     }
-  };
-}
 
-async function extractTextFromPDF(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      try {
-        if (file.type === 'application/pdf') {
-          const pdfjsLib = await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.mjs');
-          pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.mjs';
-          const pdf = await pdfjsLib.getDocument({ data: e.target.result }).promise;
-          let text = '';
-          for (let i = 1; i <= Math.min(pdf.numPages, 10); i++) {
-            const page = await pdf.getPage(i);
-            const content = await page.getTextContent();
-            text += content.items.map(item => item.str).join(' ') + '\n';
-          }
-          resolve(text || "Could not extract text from PDF.");
-        } else {
-          resolve(e.target.result);
+    function renderFlashcards(text) {
+      const cards = [];
+      const lines = text.split('\n');
+      let current = {};
+      lines.forEach(line => {
+        if (line.startsWith('FRONT:')) current.front = line.replace('FRONT:', '').trim();
+        if (line.startsWith('BACK:')) {
+          current.back = line.replace('BACK:', '').trim();
+          if (current.front) cards.push({...current});
+          current = {};
         }
-      } catch (err) {
-        reject(new Error("Could not read PDF. Try a different file or paste your notes as text."));
+      });
+      if (cards.length === 0) {
+        document.getElementById('notes-box').innerHTML = `<div style="font-size:13px;color:var(--text);white-space:pre-wrap;">${text}</div>`;
+        return;
       }
-    };
-    reader.onerror = reject;
-    if (file.type === 'application/pdf') {
-      reader.readAsArrayBuffer(file);
-    } else {
-      reader.readAsText(file);
+      let currentCard = 0;
+      const render = () => {
+        const card = cards[currentCard];
+        document.getElementById('notes-box').innerHTML = `
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="font-size:11px;color:var(--muted);text-align:center;font-family:'JetBrains Mono',monospace;">${currentCard + 1} / ${cards.length}</div>
+            <div id="flashcard" style="cursor:pointer;background:rgba(37,99,235,0.06);border:1px solid rgba(37,99,235,0.15);border-radius:12px;padding:24px;text-align:center;min-height:120px;display:flex;align-items:center;justify-content:center;">
+              <div>
+                <p style="font-size:11px;color:var(--muted);margin-bottom:8px;" id="card-hint">FRONT — click to flip</p>
+                <p style="font-size:14px;color:var(--text);font-weight:500;" id="card-text">${card.front}</p>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:center;">
+              <button onclick="window._cardNav(${currentCard - 1})" ${currentCard === 0 ? 'disabled' : ''} style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:7px;padding:6px 16px;color:var(--muted);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;">← Prev</button>
+              <button onclick="window._cardNav(${currentCard + 1})" ${currentCard === cards.length - 1 ? 'disabled' : ''} style="background:rgba(37,99,235,0.1);border:1px solid rgba(37,99,235,0.2);border-radius:7px;padding:6px 16px;color:#60A5FA;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;">Next →</button>
+            </div>
+          </div>
+        `;
+        document.getElementById('flashcard').onclick = () => {
+          const t = document.getElementById('card-text');
+          const h = document.getElementById('card-hint');
+          if (t.innerText === card.front) { t.innerText = card.back; h.innerText = 'BACK — click to flip back'; }
+          else { t.innerText = card.front; h.innerText = 'FRONT — click to flip'; }
+        };
+      };
+      window._cardNav = (idx) => { currentCard = idx; render(); };
+      render();
     }
-  });
-}
-  
 
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      try {
-        const pdfjsLib = window['pdfjs-dist/build/pdf'];
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        const pdf = await pdfjsLib.getDocument({ data: e.target.result }).promise;
-        let text = '';
-        for (let i = 1; i <= Math.min(pdf.numPages, 10); i++) {
-          const page = await pdf.getPage(i);
-          const content = await page.getTextContent();
-          text += content.items.map(item => item.str).join(' ') + '\n';
+    function renderMCQ(text) {
+      const questions = text.split(/Q:/).filter(q => q.trim());
+      const html = questions.map((q, i) => {
+        const lines = q.trim().split('\n').filter(l => l.trim());
+        const question   = lines[0];
+        const options    = lines.slice(1).filter(l => /^[A-D]\)/.test(l.trim()));
+        const answerLine = lines.find(l => l.startsWith('Answer:'));
+        const answer     = answerLine ? answerLine.replace('Answer:', '').trim() : '';
+        return `
+          <div style="margin-bottom:16px;padding:14px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:10px;">
+            <p style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:10px;">${i+1}. ${question}</p>
+            ${options.map(opt => `
+              <button onclick="window._checkAnswer(this,'${answer}','${opt[0]}')"
+                style="display:block;width:100%;text-align:left;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:7px;padding:8px 12px;color:var(--muted);font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;cursor:pointer;margin-bottom:6px;transition:0.15s;">
+                ${opt.trim()}
+              </button>
+            `).join('')}
+          </div>
+        `;
+      }).join('');
+      document.getElementById('notes-box').innerHTML = `<div style="overflow-y:auto;max-height:320px;">${html}</div>`;
+      window._checkAnswer = (btn, correct, chosen) => {
+        const siblings = btn.parentElement.querySelectorAll('button');
+        siblings.forEach(b => b.disabled = true);
+        if (chosen === correct) {
+          btn.style.background = 'rgba(16,185,129,0.15)';
+          btn.style.borderColor = 'rgba(16,185,129,0.3)';
+          btn.style.color = '#34d399';
+        } else {
+          btn.style.background = 'rgba(244,63,94,0.1)';
+          btn.style.borderColor = 'rgba(244,63,94,0.2)';
+          btn.style.color = '#f87171';
+          siblings.forEach(b => {
+            if (b.innerText.trim().startsWith(correct)) {
+              b.style.background = 'rgba(16,185,129,0.15)';
+              b.style.borderColor = 'rgba(16,185,129,0.3)';
+              b.style.color = '#34d399';
+            }
+          });
         }
-        resolve(text);
-      } catch (err) {
-        reject(err);
-      }
-    };
-    reader.onerror = reject;
-    reader.readAsArrayBuffer(file);
-  });
-}
-   
+      };
+    }
 
     function formatDate(dateStr) {
       if (!dateStr) return "";
@@ -675,7 +625,7 @@ async function extractTextFromPDF(file) {
     </div>
   </div>
 
-  <!-- AI MODULE -->
+  <!-- AI CHAT MODULE -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -687,7 +637,7 @@ async function extractTextFromPDF(file) {
       projectId: "scholarflow-28cf0",
       storageBucket: "scholarflow-28cf0.firebasestorage.app",
       messagingSenderId: "126752346207",
-      appId: "1:126752346207:web:92b8026906a4b97bfacbea"
+      appId: "1:126752346217:web:92b8026906a4b97bfacbea"
     };
 
     const app2  = initializeApp(aiFirebaseConfig, "ai-assistant");
@@ -725,43 +675,27 @@ async function extractTextFromPDF(file) {
     async function sendMessage(text) {
       appendMessage(text, 'user');
       const typingEl = appendMessage('Thinking...', 'ai', true);
-
       const assignmentContext = userAssignments.length > 0
         ? `The student has these assignments:\n${userAssignments.map(a =>
             `- ${a.subject}: "${a.title}" due ${a.dueDate}, priority: ${a.priority}, status: ${a.status}`
           ).join('\n')}`
         : "The student has no assignments yet.";
-
-      const systemPrompt = `You are Flow, a smart and friendly AI study assistant built into ScholarFlow, a student homework tracker. You have access to the student's real assignment data.
-
-${assignmentContext}
-
-Be concise, helpful, and encouraging. Use bullet points when listing things. Keep responses under 200 words unless building a schedule. Never use markdown headers.`;
-
+      const systemPrompt = `You are Flow, a smart and friendly AI study assistant built into ScholarFlow, a student homework tracker. You have access to the student's real assignment data.\n\n${assignmentContext}\n\nBe concise, helpful, and encouraging. Use bullet points when listing things. Keep responses under 200 words unless building a schedule. Never use markdown headers.`;
       chatHistory.push({ role: "user", content: text });
-
       try {
         const response = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            system: systemPrompt,
-            messages: chatHistory
-          })
+          body: JSON.stringify({ system: systemPrompt, messages: chatHistory })
         });
-
         const data = await response.json();
-        console.log('API response:', data);
         const reply = data.choices?.[0]?.message?.content || "Something went wrong — try again!";
         chatHistory.push({ role: "assistant", content: reply });
         typingEl.querySelector('p').innerText = reply;
         typingEl.classList.remove('ai-typing');
-
       } catch (err) {
-        console.error('Error:', err);
         typingEl.querySelector('p').innerText = "Something went wrong. Try again!";
       }
-
       scrollMessages();
     }
 
