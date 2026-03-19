@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><polygon points='16,4 28,10 16,16 4,10' fill='%232563EB'/><rect x='4' y='16' width='24' height='3' fill='%231E3A5F'/><line x1='28' y1='10' x2='28' y2='24' stroke='%2360A5FA' stroke-width='2' stroke-linecap='round'/><circle cx='28' cy='26' r='2' fill='%2360A5FA'/></svg>">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -152,6 +153,11 @@
           <div class="upload-icon">📄</div>
           <p class="upload-text">Drop a PDF, textbook chapter,<br>or class handout here</p>
           <button class="upload-btn" onclick="document.getElementById('file-input').click()">Choose file</button>
+          <select id="notes-mode" style="width:100%;margin-top:10px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;outline:none;">
+            <option value="notes">📝 Study Notes</option>
+            <option value="flashcards">🃏 Flashcards</option>
+            <option value="mcq">✅ MCQ Quiz</option>
+          </select>
           <input type="file" id="file-input" accept=".pdf,image/*" style="display:none"/>
           <p class="file-name" id="file-name"></p>
         </div>
@@ -406,10 +412,199 @@
       }
     };
 
-    document.getElementById('generate-btn').onclick = () => {
-      document.getElementById('notes-box').innerHTML =
-        `<p class="notes-placeholder" style="color:#60A5FA">AI notes coming soon!</p>`;
+    document.getElementById('generate-btn').onclick = async () => {
+  const file = document.getElementById('file-input').files[0];
+  const mode = document.getElementById('notes-mode').value;
+  if (!file) return;
+
+  const btn = document.getElementById('generate-btn');
+  btn.disabled = true;
+  btn.innerText = 'Generating...';
+
+  document.getElementById('notes-box').innerHTML =
+    `<p class="notes-placeholder" style="color:#60A5FA">Reading your file...</p>`;
+
+  try {
+    const text = await extractTextFromPDF(file);
+
+    const prompts = {
+      mcq: `Generate 5 multiple choice questions from this content. Format each as:
+Q: [question]
+A) [option]
+B) [option]
+C) [option]
+D) [option]
+Answer: [correct letter]
+
+Content: ${text.slice(0, 3000)}`,
+      flashcards: `Generate 8 flashcards from this content. Format each as:
+FRONT: [concept or term]
+BACK: [definition or explanation]
+
+Content: ${text.slice(0, 3000)}`,
+      notes: `Generate concise bullet point study notes from this content. Group by topic.
+
+Content: ${text.slice(0, 3000)}`
     };
+
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        system: "You are a study assistant that generates high quality study materials from student notes and textbooks. Be clear, accurate and educational.",
+        messages: [{ role: "user", content: prompts[mode] }]
+      })
+    });
+
+    const data = await response.json();
+    const result = data.choices?.[0]?.message?.content || "Something went wrong!";
+
+    if (mode === 'flashcards') {
+      renderFlashcards(result);
+    } else if (mode === 'mcq') {
+      renderMCQ(result);
+    } else {
+      document.getElementById('notes-box').innerHTML =
+        `<div style="font-size:13px;color:var(--text);line-height:1.8;white-space:pre-wrap;">${result}</div>`;
+    }
+
+  } catch (err) {
+    document.getElementById('notes-box').innerHTML =
+      `<p class="notes-placeholder" style="color:#f87171">Error: ${err.message}</p>`;
+  }
+
+  btn.disabled = false;
+  btn.innerText = 'Generate';
+};
+
+function renderFlashcards(text) {
+  const cards = [];
+  const lines = text.split('\n');
+  let current = {};
+  lines.forEach(line => {
+    if (line.startsWith('FRONT:')) current.front = line.replace('FRONT:', '').trim();
+    if (line.startsWith('BACK:'))  { current.back = line.replace('BACK:', '').trim(); if (current.front) cards.push({...current}); current = {}; }
+  });
+
+  if (cards.length === 0) {
+    document.getElementById('notes-box').innerHTML = `<div style="font-size:13px;color:var(--text);white-space:pre-wrap;">${text}</div>`;
+    return;
+  }
+
+  let currentCard = 0;
+  const render = () => {
+    const card = cards[currentCard];
+    document.getElementById('notes-box').innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:12px;height:100%;">
+        <div style="font-size:11px;color:var(--muted);text-align:center;font-family:'JetBrains Mono',monospace;">${currentCard + 1} / ${cards.length}</div>
+        <div id="flashcard" onclick="this.classList.toggle('flipped')" style="cursor:pointer;background:rgba(37,99,235,0.06);border:1px solid rgba(37,99,235,0.15);border-radius:12px;padding:24px;text-align:center;min-height:120px;display:flex;align-items:center;justify-content:center;transition:0.3s;">
+          <div>
+            <p style="font-size:11px;color:var(--muted);margin-bottom:8px;">FRONT — click to reveal</p>
+            <p style="font-size:14px;color:var(--text);font-weight:500;" id="card-text">${card.front}</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:center;">
+          <button onclick="(${currentCard} > 0) && (window._cardNav(${currentCard - 1}))" style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:7px;padding:6px 16px;color:var(--muted);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;">← Prev</button>
+          <button onclick="window._cardNav(${currentCard + 1 < cards.length ? currentCard + 1 : currentCard})" style="background:rgba(37,99,235,0.1);border:1px solid rgba(37,99,235,0.2);border-radius:7px;padding:6px 16px;color:#60A5FA;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;">Next →</button>
+        </div>
+      </div>
+    `;
+    const fc = document.getElementById('flashcard');
+    if (fc) {
+      fc.onclick = () => {
+        const t = document.getElementById('card-text');
+        const hint = fc.querySelector('p');
+        if (t.innerText === card.front) { t.innerText = card.back; if(hint) hint.innerText = 'BACK'; }
+        else { t.innerText = card.front; if(hint) hint.innerText = 'FRONT — click to reveal'; }
+      };
+    }
+  };
+  window._cardNav = (idx) => { currentCard = idx; render(); };
+  render();
+}
+
+function renderMCQ(text) {
+  const questions = text.split(/Q:/).filter(q => q.trim());
+  let score = 0;
+  let answered = 0;
+
+  const html = questions.map((q, i) => {
+    const lines = q.trim().split('\n').filter(l => l.trim());
+    const question = lines[0];
+    const options  = lines.slice(1).filter(l => /^[A-D]\)/.test(l.trim()));
+    const answerLine = lines.find(l => l.startsWith('Answer:'));
+    const answer = answerLine ? answerLine.replace('Answer:', '').trim() : '';
+
+    return `
+      <div class="mcq-item" style="margin-bottom:16px;padding:14px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:10px;">
+        <p style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:10px;">${i+1}. ${question}</p>
+        ${options.map(opt => `
+          <button onclick="window._checkAnswer(this,'${answer}','${opt[0]}')" 
+            style="display:block;width:100%;text-align:left;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:7px;padding:8px 12px;color:var(--muted);font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;cursor:pointer;margin-bottom:6px;transition:0.15s;">
+            ${opt.trim()}
+          </button>
+        `).join('')}
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('notes-box').innerHTML = `<div style="overflow-y:auto;max-height:300px;">${html}</div>`;
+
+  window._checkAnswer = (btn, correct, chosen) => {
+    const siblings = btn.parentElement.querySelectorAll('button');
+    siblings.forEach(b => b.disabled = true);
+    if (chosen === correct) {
+      btn.style.background = 'rgba(16,185,129,0.15)';
+      btn.style.borderColor = 'rgba(16,185,129,0.3)';
+      btn.style.color = '#34d399';
+    } else {
+      btn.style.background = 'rgba(244,63,94,0.1)';
+      btn.style.borderColor = 'rgba(244,63,94,0.2)';
+      btn.style.color = '#f87171';
+      siblings.forEach(b => {
+        if (b.innerText.trim().startsWith(correct)) {
+          b.style.background = 'rgba(16,185,129,0.15)';
+          b.style.borderColor = 'rgba(16,185,129,0.3)';
+          b.style.color = '#34d399';
+        }
+      });
+    }
+  };
+}
+
+async function extractTextFromPDF(file) {
+  if (!file.type.includes('pdf')) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsText(file);
+    });
+  }
+
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const pdfjsLib = window['pdfjs-dist/build/pdf'];
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        const pdf = await pdfjsLib.getDocument({ data: e.target.result }).promise;
+        let text = '';
+        for (let i = 1; i <= Math.min(pdf.numPages, 10); i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          text += content.items.map(item => item.str).join(' ') + '\n';
+        }
+        resolve(text);
+      } catch (err) {
+        reject(err);
+      }
+    };
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
+   
 
     function formatDate(dateStr) {
       if (!dateStr) return "";
