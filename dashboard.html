@@ -492,7 +492,7 @@
           resolve(e.target.result);
         }
       } catch (err) {
-        console.error('PDF error:', err);
+        console.error('PDF error full:', err.message, err.stack);
         reject(new Error("Could not read file: " + err.message));
       }
     };
